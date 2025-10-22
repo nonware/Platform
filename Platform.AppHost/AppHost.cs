@@ -2,30 +2,29 @@ using Projects;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
+var ravenServer = builder.AddRavenDB("ravenServer");
+var ravendb = ravenServer.AddDatabase("RavenDBDatabase");
+
 var seq = builder.AddSeq("seq", 5341)
     .ExcludeFromManifest()
     .WithLifetime(ContainerLifetime.Persistent)
     .WithEnvironment("ACCEPT_EULA", "Y");
 
-var redis = builder.AddRedis("storage")
-    .WithImagePullPolicy(ImagePullPolicy.Missing)
-    .WithRedisInsight();
-
 var orleans = builder.AddOrleans("orleans")
-    .WithClustering(redis)
-    .WithGrainStorage("Default", redis);
+    .WithClustering(ravendb)
+    .WithGrainStorage("RavenDBDatabase", ravendb);
 
 var silo = builder.AddProject<Platform_Silo>("silo")
     .WithReference(orleans)
-    .WithReference(redis)
-    .WaitFor(redis)
+    .WithReference(ravendb)
+    .WaitFor(ravendb)
     .WithReference(seq)
     .WaitFor(seq)
     .WithReplicas(3);
 
 var apiService = builder.AddProject<Platform_ApiService>("apiservice")
     .WithReference(orleans.AsClient())
-    .WithReference(redis)
+    .WithReference(ravendb)
     .WaitFor(silo)
     .WithReference(seq)
     .WaitFor(seq)

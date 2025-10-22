@@ -2,7 +2,6 @@
 
 var builder = WebApplication.CreateBuilder(args);
 builder.AddServiceDefaults();
-builder.AddKeyedRedisClient("storage");
 builder.AddSeqEndpoint(connectionName: "seq");
 builder.UseOrleans();
 
@@ -12,19 +11,26 @@ app.MapGet("/", () => "OK");
 
 await app.RunAsync();
 
-
-public sealed class CounterGrain(
-    [PersistentState("count")] IPersistentState<int> count) : ICounterGrain
+public sealed class CounterState
 {
+    public int Value { get; set; }
+}
+
+public sealed class CounterGrain : ICounterGrain
+{
+    private readonly IPersistentState<CounterState> _state;
+
+    public CounterGrain([PersistentState(stateName: "counter", storageName: "RavenDBDatabase")] IPersistentState<CounterState> state)
+        => _state = state;
     public ValueTask<int> Get()
     {
-        return ValueTask.FromResult(count.State);
+        return ValueTask.FromResult(_state.State.Value);
     }
 
     public async ValueTask<int> Increment()
     {
-        var result = ++count.State;
-        await count.WriteStateAsync();
-        return result;
+        _state.State.Value++;
+        await _state.WriteStateAsync();
+        return _state.State.Value;
     }
 }
