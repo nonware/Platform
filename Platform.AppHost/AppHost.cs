@@ -12,7 +12,7 @@ var seq = builder.AddSeq("seq", 5341)
 
 var orleans = builder.AddOrleans("orleans")
     .WithClustering(ravendb)
-    .WithGrainStorage("RavenDBDatabase", ravendb);
+    .WithGrainStorage(ravendb);
 
 var silo = builder.AddProject<Platform_Silo>("silo")
     .WithReference(orleans)
