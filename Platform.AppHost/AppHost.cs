@@ -3,7 +3,7 @@ using Projects;
 var builder = DistributedApplication.CreateBuilder(args);
 
 var ravenServer = builder.AddRavenDB("ravenServer");
-var ravendb = ravenServer.AddDatabase("CounterStore");
+var ravendb = ravenServer.AddDatabase("RavenDBDatabase");
 
 var seq = builder.AddSeq("seq", 5341)
     .ExcludeFromManifest()
@@ -11,7 +11,7 @@ var seq = builder.AddSeq("seq", 5341)
     .WithEnvironment("ACCEPT_EULA", "Y");
 
 var orleans = builder.AddOrleans("orleans")
-    .WithClustering(ravendb)
+    .WithDevelopmentClustering()
     .WithGrainStorage(ravendb);
 
 var silo = builder.AddProject<Platform_Silo>("silo")
