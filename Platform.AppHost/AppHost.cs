@@ -3,7 +3,7 @@ using Projects;
 var builder = DistributedApplication.CreateBuilder(args);
 
 var ravenServer = builder.AddRavenDB("ravenServer");
-var ravendb = ravenServer.AddDatabase("RavenDBDatabase");
+var ravendb = ravenServer.AddDatabase("CounterStore");
 
 var seq = builder.AddSeq("seq", 5341)
     .ExcludeFromManifest()
