@@ -2,7 +2,9 @@ using Projects;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-var ravenServer = builder.AddRavenDB("ravenServer");
+var ravenServer = builder
+    .AddRavenDB("ravenServer").WithImageTag("latest")
+    .WithDataVolume();
 var ravendb = ravenServer.AddDatabase("CounterStore");
 
 var seq = builder.AddSeq("seq", 5341)
@@ -25,6 +27,7 @@ var silo = builder.AddProject<Platform_Silo>("silo")
 var apiService = builder.AddProject<Platform_ApiService>("apiservice")
     .WithReference(orleans.AsClient())
     .WithReference(ravendb)
+    .WaitFor(ravendb)
     .WaitFor(silo)
     .WithReference(seq)
     .WaitFor(seq)
