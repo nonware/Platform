@@ -2,19 +2,21 @@ using Projects;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-var ravenServer = builder
-    .AddRavenDB("ravenServer").WithImageTag("latest")
-    .WithDataVolume();
-var ravendb = ravenServer.AddDatabase("CounterStore");
-
 var seq = builder.AddSeq("seq", 5341)
     .ExcludeFromManifest()
     .WithLifetime(ContainerLifetime.Persistent)
     .WithEnvironment("ACCEPT_EULA", "Y");
 
+var ravenServer = builder
+    .AddRavenDB("ravenServer")
+    .WithImageTag("latest")
+    .WithDataVolume();
+
+var ravendb = ravenServer.AddDatabase("CounterStore");
+
 var orleans = builder.AddOrleans("orleans")
     .WithDevelopmentClustering()
-    .WithGrainStorage(ravendb);
+    .WithGrainStorage("Default", ravendb);
 
 var silo = builder.AddProject<Platform_Silo>("silo")
     .WithReference(orleans)

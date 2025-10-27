@@ -20,7 +20,7 @@ public sealed class CounterGrain : ICounterGrain
 {
     private readonly IPersistentState<CounterState> _state;
 
-    public CounterGrain([PersistentState(stateName: "counter", storageName: "CounterStore")] IPersistentState<CounterState> state)
+    public CounterGrain([PersistentState(stateName: "counter")] IPersistentState<CounterState> state)
         => _state = state;
     public ValueTask<int> Get()
     {
