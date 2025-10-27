@@ -1,7 +1,7 @@
 ﻿using Platform.Contracts;
 
 var builder = WebApplication.CreateBuilder(args);
-//builder.AddServiceDefaults();
+builder.AddServiceDefaults();
 builder.AddSeqEndpoint(connectionName: "seq");
 builder.UseOrleans();
 
