@@ -1,9 +1,28 @@
-﻿using Platform.Contracts;
+﻿using Orleans.Providers.RavenDb.Membership;
+using Orleans.Providers.RavenDb.StorageProviders;
+using Platform.Contracts;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.AddServiceDefaults();
 builder.AddSeqEndpoint(connectionName: "seq");
-builder.UseOrleans();
+
+builder.UseOrleans(siloBuilder =>
+{
+    siloBuilder
+        .AddRavenDbGrainStorageAsDefault(options =>
+        {
+            // can be parsed from 'ravendb-resource' connection string
+            options.DatabaseName = "CounterStore";
+            options.Urls = ["http://localhost:8080"];
+        })
+        .UseRavenDbMembershipTable(options =>
+        {
+            options.Urls = ["http://localhost:8080"];
+            options.DatabaseName = "Memberships";
+            options.ClusterId = "dev";
+            options.ServiceId = "OrleansAspireDemo";
+        });
+});
 
 var app = builder.Build();
 
