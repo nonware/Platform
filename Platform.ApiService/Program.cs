@@ -1,3 +1,4 @@
+using Orleans.Providers.RavenDb.Membership;
 using Platform.Contracts;
 using Serilog;
 
@@ -10,9 +11,17 @@ Log.Logger = new LoggerConfiguration()
 
 builder.AddSeqEndpoint(connectionName: "seq");
 
-// Add Orleans
-builder.UseOrleansClient();
-
+// Configure Orleans client to use Ravendb's GatewayListProvider
+builder.UseOrleansClient(clientBuilder =>
+{
+    clientBuilder.UseRavenDbClustering(o =>
+    {
+        o.Urls = ["http://localhost:8080"];
+        o.DatabaseName = "Memberships";
+        o.ClusterId = "dev";
+        o.ServiceId = "OrleansAspireDemo";
+    });
+});
 // Add services to the container.
 builder.Services.AddProblemDetails();
 
